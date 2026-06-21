@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 export const Route = createFileRoute("/share/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `Your photos · PhotoSort` },
+      { title: `Your photos · Lumora` },
       { name: "description", content: `Sorted wedding photo gallery ${params.id}` },
       { property: "og:title", content: "Your sorted wedding photos" },
       { property: "og:description", content: "Open your sorted photo folders." },
@@ -81,7 +81,7 @@ function SharePage() {
       <header className="border-b border-border">
         <div className="mx-auto max-w-6xl px-6 py-5 flex items-center justify-between">
           <Link to="/" className="font-semibold tracking-tight">
-            PhotoSort
+            Lumora
           </Link>
           <span className="text-xs text-muted-foreground">Gallery {id}</span>
         </div>
