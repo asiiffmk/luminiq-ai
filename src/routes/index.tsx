@@ -17,13 +17,13 @@ import { Camera, Upload, Sparkles, Link as LinkIcon, Loader2 } from "lucide-reac
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PhotoSort — Auto-sort wedding photos in your browser" },
+      { title: "Lumora — Auto-sort wedding photos in your browser" },
       {
         name: "description",
         content:
           "Upload up to 1000 wedding photos and automatically sort out blurry, tilted, indoor/outdoor and selected-person shots. 100% browser-based, free, with shareable client links.",
       },
-      { property: "og:title", content: "PhotoSort — Auto-sort wedding photos" },
+      { property: "og:title", content: "Lumora — Auto-sort wedding photos" },
       {
         property: "og:description",
         content: "Auto-sort blurry, tilted, indoor/outdoor and selected-person shots in your browser.",
@@ -117,7 +117,7 @@ function Index() {
         <div className="mx-auto max-w-5xl px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">PhotoSort</span>
+            <span className="font-semibold tracking-tight">Lumora</span>
           </div>
           <Button asChild variant="outline" size="sm">
             <Link to="/auth">Log in</Link>

@@ -12,10 +12,10 @@ import { Sparkles, Loader2 } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "PhotoSort — Log in" },
+      { title: "Lumora — Log in" },
       {
         name: "description",
-        content: "Log in or sign up to PhotoSort to manage your photo sorting sessions.",
+        content: "Log in or sign up to Lumora to manage your photo sorting sessions.",
       },
     ],
   }),
@@ -99,7 +99,7 @@ function AuthPage() {
         <div className="mx-auto max-w-5xl px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">PhotoSort</span>
+            <span className="font-semibold tracking-tight">Lumora</span>
           </Link>
         </div>
       </header>
