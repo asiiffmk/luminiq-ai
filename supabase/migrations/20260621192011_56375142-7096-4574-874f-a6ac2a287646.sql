@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "anon read sorted-photos" ON storage.objects;
