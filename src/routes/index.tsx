@@ -119,14 +119,18 @@ function Index() {
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-semibold tracking-tight">PhotoSort</span>
           </div>
-          <span className="text-xs text-muted-foreground">{"\n"}</span>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/auth">Log in</Link>
+          </Button>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
         <section className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Transform thousands of photos into organized galleries in minutes
+          <h1 className="text-2xl md:text-4xl font-semibold tracking-tight">
+            Transform thousands of photos into
+            <br className="md:hidden" />{" "}
+            organized galleries in minutes
           </h1>
           <p className="text-muted-foreground max-w-2xl">
             Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections
