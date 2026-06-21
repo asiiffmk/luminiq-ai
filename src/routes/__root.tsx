@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "PhotoSort — AI Wedding Photo Sorter" },
+      { name: "description", content: "Upload up to 1,000 wedding photos and auto-sort blurry, tilted, indoor/outdoor shots and find a specific person — all in your browser, free." },
+      { property: "og:title", content: "PhotoSort — AI Wedding Photo Sorter" },
+      { property: "og:description", content: "Auto-sort wedding photos by quality and content in your browser. Share results via link." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "PhotoSort — AI Wedding Photo Sorter" },
+      { name: "twitter:description", content: "Auto-sort wedding photos by quality and content in your browser. Share results via link." },
     ],
     links: [
       {
