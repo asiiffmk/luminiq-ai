@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumora — AI Wedding Photo Sorter" },
-      { name: "description", content: "Upload up to 1,000 wedding photos and auto-sort blurry, tilted, indoor/outdoor shots and find a specific person — all in your browser, free." },
-      { property: "og:title", content: "Lumora — AI Wedding Photo Sorter" },
-      { property: "og:description", content: "Auto-sort wedding photos by quality and content in your browser. Share results via link." },
+      { title: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { name: "description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
+      { property: "og:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { property: "og:description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Lumora — AI Wedding Photo Sorter" },
-      { name: "twitter:description", content: "Auto-sort wedding photos by quality and content in your browser. Share results via link." },
+      { name: "twitter:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { name: "twitter:description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
     ],
     links: [
       {
