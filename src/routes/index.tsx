@@ -119,7 +119,7 @@ function Index() {
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-semibold tracking-tight">PhotoSort</span>
           </div>
-          <span className="text-xs text-muted-foreground">Runs 100% in your browser</span>
+          <span className="text-xs text-muted-foreground">{"\n"}</span>
         </div>
       </header>
 
