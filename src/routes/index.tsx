@@ -58,6 +58,11 @@ function Index() {
       toast.error("Add some photos first");
       return;
     }
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast.error("Please sign in to upload photos");
+      return;
+    }
     setRunning(true);
     setShareUrl(null);
     setCounts(EMPTY_COUNTS);
