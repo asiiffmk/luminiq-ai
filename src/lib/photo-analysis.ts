@@ -1,21 +1,26 @@
-import * as faceapi from "@vladmandic/face-api";
-import * as mobilenet from "@tensorflow-models/mobilenet";
-import "@tensorflow/tfjs";
-
 const FACE_MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model";
 
+type FaceApi = typeof import("@vladmandic/face-api");
+type Mobilenet = typeof import("@tensorflow-models/mobilenet");
+
+let faceapi: FaceApi | null = null;
+let mobilenetMod: Mobilenet | null = null;
+let mobilenetModel: Awaited<ReturnType<Mobilenet["load"]>> | null = null;
 let modelsReady: Promise<void> | null = null;
-let mobilenetModel: mobilenet.MobileNet | null = null;
 
 export async function loadModels(onProgress?: (msg: string) => void) {
   if (modelsReady) return modelsReady;
   modelsReady = (async () => {
+    onProgress?.("Loading TensorFlow…");
+    await import("@tensorflow/tfjs");
     onProgress?.("Loading face detection models…");
+    faceapi = await import("@vladmandic/face-api");
     await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL);
     await faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL);
     await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL);
     onProgress?.("Loading scene model…");
-    mobilenetModel = await mobilenet.load({ version: 2, alpha: 0.5 });
+    mobilenetMod = await import("@tensorflow-models/mobilenet");
+    mobilenetModel = await mobilenetMod.load({ version: 2, alpha: 0.5 });
     onProgress?.("Models ready");
   })();
   return modelsReady;
@@ -132,6 +137,7 @@ function classifyScene(predictions: { className: string; probability: number }[]
 
 export async function computeReferenceDescriptor(file: File): Promise<Float32Array | null> {
   await loadModels();
+  if (!faceapi) return null;
   const img = await fileToImage(file);
   const detection = await faceapi
     .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 }))
@@ -145,6 +151,7 @@ export async function analyzePhoto(
   referenceDescriptor: Float32Array | null,
 ): Promise<AnalysisResult> {
   await loadModels();
+  if (!faceapi) throw new Error("Models not loaded");
   const img = await fileToImage(file);
   const { canvas, ctx, w, h } = drawToCanvas(img);
 
