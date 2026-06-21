@@ -126,12 +126,10 @@ function Index() {
       <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
         <section className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Sort a wedding shoot in minutes.
+            Transform thousands of photos into organized galleries in minutes
           </h1>
           <p className="text-muted-foreground max-w-2xl">
-            Drop up to 1000 photos. We detect blurry / tilted shots, separate indoor from
-            outdoor, and pull out every photo containing a chosen person. Then we hand you a
-            shareable link for the client.
+            Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections
           </p>
         </section>
 
