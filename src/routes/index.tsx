@@ -17,22 +17,23 @@ import { Camera, Upload, Sparkles, Link as LinkIcon, Loader2 } from "lucide-reac
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumora — Auto-sort wedding photos in your browser" },
+      { title: "Lumora — Transform thousands of photos into organized galleries in minutes" },
       {
         name: "description",
         content:
-          "Upload up to 1000 wedding photos and automatically sort out blurry, tilted, indoor/outdoor and selected-person shots. 100% browser-based, free, with shareable client links.",
+          "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections.",
       },
-      { property: "og:title", content: "Lumora — Auto-sort wedding photos" },
+      { property: "og:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
       {
         property: "og:description",
-        content: "Auto-sort blurry, tilted, indoor/outdoor and selected-person shots in your browser.",
+        content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections.",
       },
       { property: "og:type", content: "website" },
     ],
   }),
   component: Index,
 });
+
 
 const BUCKET = "sorted-photos";
 
