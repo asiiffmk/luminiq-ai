@@ -17,13 +17,13 @@ import { Camera, Upload, Sparkles, Link as LinkIcon, Loader2 } from "lucide-reac
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { title: "Luminiq — Transform thousands of photos into organized galleries in minutes" },
       {
         name: "description",
         content:
           "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections.",
       },
-      { property: "og:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { property: "og:title", content: "Luminiq — Transform thousands of photos into organized galleries in minutes" },
       {
         property: "og:description",
         content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections.",
@@ -123,7 +123,7 @@ function Index() {
         <div className="mx-auto max-w-5xl px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">Lumora</span>
+            <span className="font-semibold tracking-tight">Luminiq</span>
           </div>
           <Button asChild variant="outline" size="sm">
             <Link to="/auth">Log in</Link>

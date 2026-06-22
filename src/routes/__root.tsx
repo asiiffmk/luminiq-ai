@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { title: "Luminiq — Transform thousands of photos into organized galleries in minutes" },
       { name: "description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
-      { property: "og:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { property: "og:title", content: "Luminiq — Transform thousands of photos into organized galleries in minutes" },
       { property: "og:description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Lumora — Transform thousands of photos into organized galleries in minutes" },
+      { name: "twitter:title", content: "Luminiq — Transform thousands of photos into organized galleries in minutes" },
       { name: "twitter:description", content: "Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections." },
     ],
     links: [
