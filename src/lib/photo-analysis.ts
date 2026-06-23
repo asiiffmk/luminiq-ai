@@ -50,7 +50,10 @@ export type PhotoCategory =
   | "outdoor"
   | "indoor"
   | "selected_person"
+  | "duplicate"
   | "keepers";
+
+export type SortType = "all" | "outdoor" | "indoor" | "group";
 
 export interface AnalysisResult {
   blurScore: number;
@@ -59,8 +62,11 @@ export interface AnalysisResult {
   isTilted: boolean;
   scene: "outdoor" | "indoor" | "unknown";
   topLabel: string;
+  faceCount: number;
   matchedPerson: boolean;
   matchDistance: number | null;
+  /** 64-bit perceptual hash (dHash) used to detect near-duplicate burst shots */
+  hash: string;
   categories: PhotoCategory[];
 }
 
@@ -133,6 +139,80 @@ function classifyScene(predictions: { className: string; probability: number }[]
     scene: outdoorScore >= indoorScore ? ("outdoor" as const) : ("indoor" as const),
     topLabel,
   };
+}
+
+// --- Near-duplicate detection (burst shots) -------------------------------
+// Classic dHash (difference hash): downscale to 9x8 grayscale, compare each
+// pixel to its right neighbour. Two photos of basically "the same moment"
+// (a 5-shot burst of the same pose) end up with hashes a few bits apart;
+// genuinely different photos differ in dozens of bits.
+const HASH_W = 9;
+const HASH_H = 8;
+
+function computeDHash(img: HTMLImageElement): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = HASH_W;
+  canvas.height = HASH_H;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  ctx.drawImage(img, 0, 0, HASH_W, HASH_H);
+  const { data } = ctx.getImageData(0, 0, HASH_W, HASH_H);
+  const gray: number[] = [];
+  for (let i = 0; i < data.length; i += 4) {
+    gray.push(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+  }
+  let bits = "";
+  for (let y = 0; y < HASH_H; y++) {
+    for (let x = 0; x < HASH_W - 1; x++) {
+      bits += gray[y * HASH_W + x] > gray[y * HASH_W + x + 1] ? "1" : "0";
+    }
+  }
+  return bits;
+}
+
+export function hammingDistance(a: string, b: string): number {
+  let d = 0;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) d++;
+  return d;
+}
+
+/** How close two photos need to be (out of 64 bits) to count as "the same burst shot". */
+export const DUPLICATE_HASH_THRESHOLD = 10;
+
+/** Higher is better. Sharper photos and straighter faces rank first within a duplicate cluster. */
+export function qualityScore(r: Pick<AnalysisResult, "blurScore" | "tiltAngle">): number {
+  const tiltPenalty = r.tiltAngle !== null ? Math.abs(r.tiltAngle) * 5 : 0;
+  return r.blurScore - tiltPenalty;
+}
+
+/**
+ * Groups near-duplicate photos by perceptual hash and, within each group,
+ * keeps only the `keepPerGroup` best (sharpest / straightest) photos.
+ * Returns the set of indices (into `items`) that should be DROPPED as duplicates.
+ */
+export function findDuplicatesToDrop<
+  T extends { hash: string; blurScore: number; tiltAngle: number | null },
+>(items: T[], keepPerGroup = 2): Set<number> {
+  const clusters: number[][] = [];
+  for (let i = 0; i < items.length; i++) {
+    let placed = false;
+    for (const cluster of clusters) {
+      const rep = items[cluster[0]];
+      if (hammingDistance(rep.hash, items[i].hash) <= DUPLICATE_HASH_THRESHOLD) {
+        cluster.push(i);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) clusters.push([i]);
+  }
+
+  const drop = new Set<number>();
+  for (const cluster of clusters) {
+    if (cluster.length <= keepPerGroup) continue; // nothing extra to remove
+    const ranked = [...cluster].sort((a, b) => qualityScore(items[b]) - qualityScore(items[a]));
+    for (const idx of ranked.slice(keepPerGroup)) drop.add(idx);
+  }
+  return drop;
 }
 
 export async function computeReferenceDescriptor(file: File): Promise<Float32Array | null> {
@@ -210,6 +290,8 @@ export async function analyzePhoto(
   else if (scene === "indoor") categories.push("indoor");
   if (matchedPerson) categories.push("selected_person");
 
+  const hash = computeDHash(img);
+
   return {
     blurScore,
     isBlurry,
@@ -217,17 +299,20 @@ export async function analyzePhoto(
     isTilted,
     scene,
     topLabel,
+    faceCount: detections.length,
     matchedPerson,
     matchDistance,
+    hash,
     categories,
   };
 }
 
 export const CATEGORY_LABELS: Record<PhotoCategory, string> = {
-  keepers: "Keepers (sharp)",
+  keepers: "Final picks",
   blurry: "Blurry / out of focus",
   tilted: "Tilted / shaken",
   outdoor: "Outdoor",
   indoor: "Indoor",
   selected_person: "Selected person",
+  duplicate: "Duplicates removed",
 };
