@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, LogIn, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -106,15 +106,32 @@ function AuthPage() {
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <Card className="w-full max-w-sm p-6 space-y-5">
-          <div className="text-center space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {mode === "login" ? "Welcome back" : "Create an account"}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {mode === "login"
-                ? "Log in to manage your photo sessions"
-                : "Sign up to start sorting your photos"}
-            </p>
+          <div className="text-center space-y-3">
+            <div
+              className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${
+                mode === "login"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-emerald-500/10 text-emerald-500"
+              }`}
+            >
+              {mode === "login" ? (
+                <LogIn className="h-6 w-6" />
+              ) : (
+                <UserPlus className="h-6 w-6" />
+              )}
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {mode === "login"
+                  ? "Welcome back"
+                  : "Create your Luminiq account"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {mode === "login"
+                  ? "Log in to pick up where you left off."
+                  : "Free to start — sort your first shoot in minutes."}
+              </p>
+            </div>
           </div>
 
           <Button
@@ -179,10 +196,21 @@ function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
+              {mode === "signup" && (
+                <p className="text-xs text-muted-foreground">
+                  Use at least 8 characters. You'll get a confirmation email.
+                </p>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {mode === "login" ? "Log in" : "Sign up"}
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : mode === "login" ? (
+                <LogIn className="h-4 w-4 mr-2" />
+              ) : (
+                <UserPlus className="h-4 w-4 mr-2" />
+              )}
+              {mode === "login" ? "Log in to Luminiq" : "Create account"}
             </Button>
           </form>
 
