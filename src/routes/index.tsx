@@ -13,6 +13,16 @@ import {
   type PhotoCategory,
 } from "@/lib/photo-analysis";
 import { Camera, Upload, Sparkles, Link as LinkIcon, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,6 +53,7 @@ const EMPTY_COUNTS: Counts = {
 };
 
 function Index() {
+  const { user, isReady } = useAuth();
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [running, setRunning] = useState(false);
@@ -125,9 +136,40 @@ function Index() {
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-semibold tracking-tight">Luminiq</span>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/auth">Log in</Link>
-          </Button>
+          {!isReady ? (
+            <div className="h-8 w-20" />
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs">
+                    {(user.email ?? "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">
+                  Signed in as
+                  <div className="mt-0.5 text-sm font-medium text-foreground truncate max-w-[200px]">
+                    {user.email}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={async () => {
+                    await supabase.auth.signOut();
+                    toast.success("Logged out");
+                  }}
+                >
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/auth">Log in</Link>
+            </Button>
+          )}
         </div>
       </header>
 
