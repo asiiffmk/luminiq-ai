@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
@@ -27,6 +26,8 @@ import {
   Grid3x3,
   ArrowLeft,
   RotateCcw,
+  Check,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -66,6 +67,12 @@ const EMPTY_COUNTS: Counts = {
   keepers: 0, blurry: 0, tilted: 0, outdoor: 0, indoor: 0, selected_person: 0, duplicate: 0,
 };
 
+// Categories that represent rejected/wasted shots — shown in their own
+// "developing tray reject" row so the photographer can sanity-check what
+// got tossed, rather than the AI silently discarding things.
+const WASTE_CATEGORIES: PhotoCategory[] = ["blurry", "tilted", "duplicate"];
+const KEEP_CATEGORIES: PhotoCategory[] = ["keepers", "outdoor", "indoor", "selected_person"];
+
 type Step = "choose" | "options" | "running" | "done";
 
 const SORT_TYPES: { value: SortType; label: string; icon: typeof TreePalm }[] = [
@@ -75,22 +82,28 @@ const SORT_TYPES: { value: SortType; label: string; icon: typeof TreePalm }[] = 
   { value: "group", label: "Group only", icon: Users },
 ];
 
+function FilmDivider() {
+  return <div className="filmstrip h-3 w-full" aria-hidden="true" />;
+}
+
 function Header() {
   const { user, isReady } = useAuth();
   return (
-    <header className="border-b border-border">
-      <div className="mx-auto max-w-5xl px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <span className="font-semibold tracking-tight">Luminiq</span>
+    <header className="sticky top-0 z-10 bg-background/90 backdrop-blur-sm">
+      <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-negative text-background">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <span className="font-display text-lg uppercase tracking-[0.08em]">Luminiq</span>
         </div>
         {!isReady ? (
           <div className="h-8 w-20" />
         ) : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">
+              <Avatar className="h-8 w-8 border border-border">
+                <AvatarFallback className="text-xs font-mono">
                   {(user.email ?? "?").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -119,6 +132,7 @@ function Header() {
           </Button>
         )}
       </div>
+      <FilmDivider />
     </header>
   );
 }
@@ -269,25 +283,37 @@ function Index() {
     }
   }
 
+  const totalKept = KEEP_CATEGORIES.reduce((s, c) => s + counts[c], 0);
+  const totalWasted = WASTE_CATEGORIES.reduce((s, c) => s + counts[c], 0);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
+      <main className="mx-auto max-w-5xl px-6 py-12 space-y-10">
         {step === "choose" && (
-          <>
-            <section className="space-y-3">
-              <h1 className="text-xl md:text-4xl font-semibold tracking-tight">
-                <span className="whitespace-nowrap md:whitespace-normal">Transform thousands of photos into</span>
-                <br className="md:hidden" />{" "}
-                <span className="whitespace-nowrap md:whitespace-normal">organized galleries in minutes</span>
+          <div key="choose" className="step-in space-y-10">
+            <section className="space-y-4">
+              <div className="frame-counter flex items-center gap-2">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                F·001 — CONTACT SHEET TOOL
+              </div>
+              <h1 className="font-display text-3xl md:text-5xl uppercase tracking-tight leading-[1.05]">
+                Thousands of photos.
+                <br />
+                <span className="text-primary">One organized gallery.</span>
               </h1>
-              <p className="text-muted-foreground max-w-2xl">
-                Upload an entire shoot and let AI handle the sorting. Automatically group people, identify the best shots, remove duplicates, and organize your photos into ready-to-deliver collections.
+              <p className="text-muted-foreground max-w-xl text-base">
+                Load a whole shoot onto the light table. Luminiq culls the blur, straightens out
+                the bursts, and hands back a gallery worth delivering.
               </p>
             </section>
 
-            <div className="flex flex-col items-center justify-center py-16 gap-4 border border-dashed border-border rounded-xl">
+            <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-brass/50 bg-card">
+              <div className="absolute left-3 top-3 h-2 w-2 rounded-full border border-brass/60" />
+              <div className="absolute right-3 top-3 h-2 w-2 rounded-full border border-brass/60" />
+              <div className="absolute left-3 bottom-3 h-2 w-2 rounded-full border border-brass/60" />
+              <div className="absolute right-3 bottom-3 h-2 w-2 rounded-full border border-brass/60" />
               <input
                 ref={photosInput}
                 type="file"
@@ -296,56 +322,68 @@ function Index() {
                 className="hidden"
                 onChange={handleChooseFiles}
               />
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <Button size="lg" onClick={() => photosInput.current?.click()}>
-                Choose files to sort
-              </Button>
-              <p className="text-xs text-muted-foreground">Up to 1000 JPGs. Nothing uploads until you tap Sort.</p>
+              <div className="flex flex-col items-center justify-center py-20 gap-5 px-6">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Upload className="h-6 w-6" />
+                </span>
+                <Button size="lg" className="font-display uppercase tracking-wide" onClick={() => photosInput.current?.click()}>
+                  Choose files to sort
+                </Button>
+                <p className="frame-counter">UP TO 1000 JPGS · NOTHING UPLOADS UNTIL YOU SORT</p>
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {step === "options" && (
-          <>
+          <div key="options" className="step-in space-y-8">
             <button
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setStep("choose")}
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Choose different files
             </button>
 
             <section className="space-y-1">
-              <h1 className="text-lg font-semibold">{photos.length} photos selected</h1>
-              <p className="text-sm text-muted-foreground">Set your sort options, then tap Sort.</p>
+              <div className="frame-counter">F·002 — {photos.length} FRAMES LOADED</div>
+              <h1 className="font-display text-2xl uppercase tracking-tight">Set the sort</h1>
+              <p className="text-sm text-muted-foreground">Pick what to keep, then run it through.</p>
             </section>
 
-            <Card className="p-5 space-y-3">
-              <h2 className="font-medium">Sort type</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {SORT_TYPES.map(({ value, label, icon: Icon }) => (
-                  <button
-                    key={value}
-                    onClick={() => setSortType(value)}
-                    className={`flex flex-col items-center gap-2 rounded-lg border p-4 text-sm transition-colors ${
-                      sortType === value
-                        ? "border-primary bg-primary/10 text-foreground"
-                        : "border-border hover:bg-accent text-muted-foreground"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    {label}
-                  </button>
-                ))}
+            <Card className="p-5 space-y-4 border-border">
+              <h2 className="font-display text-sm uppercase tracking-wide text-muted-foreground">Sort type</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {SORT_TYPES.map(({ value, label, icon: Icon }) => {
+                  const active = sortType === value;
+                  return (
+                    <button
+                      key={value}
+                      data-active={active}
+                      onClick={() => setSortType(value)}
+                      className={`dial-chip flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-sm ${
+                        active
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border hover:border-brass/60 hover:bg-accent text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="font-medium">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </Card>
 
-            <Card className="p-5 space-y-3">
+            <Card className="p-5 space-y-3 border-border">
               <div className="flex items-center gap-2">
                 <Camera className="h-4 w-4 text-primary" />
-                <h2 className="font-medium">Select person from reference image (optional)</h2>
+                <h2 className="font-display text-sm uppercase tracking-wide text-muted-foreground">
+                  Select person from reference image
+                </h2>
+                <span className="frame-counter">OPTIONAL</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                One clear photo of the person you want pulled out of group shots. Leave empty to keep everyone.
+                One clear photo of the person to pull out of group shots. Leave empty to keep everyone.
               </p>
               <input
                 ref={refInput}
@@ -369,55 +407,84 @@ function Index() {
               </div>
             </Card>
 
-            <Button size="lg" onClick={handleRun}>
+            <Button size="lg" className="font-display uppercase tracking-wide" onClick={handleRun}>
               <Sparkles className="h-4 w-4 mr-2" /> Sort photos
             </Button>
-          </>
+          </div>
         )}
 
         {(step === "running" || step === "done") && (
-          <>
-            <div className="flex flex-col items-start gap-3">
+          <div key="result" className="step-in space-y-8">
+            <div className="flex flex-col items-start gap-4">
               {step === "running" ? (
-                <Button size="lg" disabled>
+                <Button size="lg" disabled className="font-display uppercase tracking-wide">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" /> Sorting…
                 </Button>
               ) : (
-                <Button variant="outline" onClick={reset}>
+                <Button variant="outline" onClick={reset} className="font-display uppercase tracking-wide">
                   <RotateCcw className="h-4 w-4 mr-2" /> Sort another batch
                 </Button>
               )}
 
               {(running || progress > 0) && (
                 <div className="w-full space-y-2">
-                  <Progress value={total ? (progress / total) * 100 : 0} />
-                  <div className="text-xs text-muted-foreground">
-                    {progress} / {total} · {status}
+                  <div className="h-3 w-full overflow-hidden rounded-sm bg-muted">
+                    <div
+                      className="film-advance h-full bg-primary transition-[width] duration-300 ease-out"
+                      style={{ width: `${total ? (progress / total) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <div className="frame-counter flex items-center justify-between">
+                    <span>F·{String(progress).padStart(3, "0")} / F·{String(total).padStart(3, "0")}</span>
+                    <span>{status}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <section className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {(Object.keys(CATEGORY_LABELS) as PhotoCategory[]).map((cat) => (
-                <Card key={cat} className="p-4">
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {CATEGORY_LABELS[cat]}
-                  </div>
-                  <div className="text-2xl font-semibold mt-1">{counts[cat]}</div>
-                </Card>
-              ))}
-            </section>
+            {(running || progress > 0) && (
+              <section className="space-y-3">
+                <h2 className="font-display text-sm uppercase tracking-wide text-muted-foreground">
+                  Final picks · {totalKept}
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {KEEP_CATEGORIES.map((cat) => (
+                    <Card key={cat} className="p-4 border-border">
+                      <div className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                        <Check className="h-3 w-3 text-primary" />
+                        {CATEGORY_LABELS[cat]}
+                      </div>
+                      <div className="font-mono text-2xl font-medium mt-1">{counts[cat]}</div>
+                    </Card>
+                  ))}
+                </div>
+
+                <h2 className="font-display text-sm uppercase tracking-wide text-muted-foreground pt-2">
+                  Developing tray rejects · {totalWasted}
+                </h2>
+                <div className="grid grid-cols-3 gap-3">
+                  {WASTE_CATEGORIES.map((cat) => (
+                    <Card key={cat} className="p-4 border-border bg-muted/40">
+                      <div className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                        <X className="h-3 w-3 text-destructive" />
+                        {CATEGORY_LABELS[cat]}
+                      </div>
+                      <div className="font-mono text-2xl font-medium mt-1 text-muted-foreground">{counts[cat]}</div>
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {shareUrl && (
-              <Card className="p-5 space-y-3 border-primary/40">
+              <Card className="p-5 space-y-3 border-primary/40 step-in">
                 <div className="flex items-center gap-2">
                   <LinkIcon className="h-4 w-4 text-primary" />
-                  <h2 className="font-medium">Client share link</h2>
+                  <h2 className="font-display text-sm uppercase tracking-wide">Client share link</h2>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2">
                   <input
-                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
                     value={shareUrl}
                     readOnly
                     onFocus={(e) => e.currentTarget.select()}
@@ -434,7 +501,7 @@ function Index() {
                   <Link
                     to="/share/$id"
                     params={{ id: shareUrl.split("/").pop()! }}
-                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
                     Open
                   </Link>
@@ -444,7 +511,7 @@ function Index() {
                 </p>
               </Card>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
