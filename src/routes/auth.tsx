@@ -95,23 +95,26 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-5xl px-6 py-5 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">Luminiq</span>
+      <header className="bg-background">
+        <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-negative text-background">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="font-display text-lg uppercase tracking-[0.08em]">Luminiq</span>
           </Link>
         </div>
+        <div className="filmstrip h-3 w-full" aria-hidden="true" />
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <Card className="w-full max-w-sm p-6 space-y-5">
+        <Card className="w-full max-w-sm p-6 space-y-5 step-in border-border">
           <div className="text-center space-y-3">
             <div
               className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${
                 mode === "login"
                   ? "bg-primary/10 text-primary"
-                  : "bg-emerald-500/10 text-emerald-500"
+                  : "bg-loupe/10 text-loupe"
               }`}
             >
               {mode === "login" ? (
@@ -121,10 +124,11 @@ function AuthPage() {
               )}
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <div className="frame-counter">{mode === "login" ? "F·LOGIN" : "F·NEW ACCOUNT"}</div>
+              <h1 className="font-display text-2xl uppercase tracking-tight">
                 {mode === "login"
                   ? "Welcome back"
-                  : "Create your Luminiq account"}
+                  : "Create your account"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {mode === "login"
@@ -170,7 +174,7 @@ function AuthPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
+              <span className="bg-card px-2 text-muted-foreground frame-counter">or</span>
             </div>
           </div>
 
@@ -202,7 +206,7 @@ function AuthPage() {
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full font-display uppercase tracking-wide" disabled={loading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : mode === "login" ? (
