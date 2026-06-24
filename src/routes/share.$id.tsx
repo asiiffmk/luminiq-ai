@@ -6,7 +6,7 @@ import { CATEGORY_LABELS, type PhotoCategory } from "@/lib/photo-analysis";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/share/$id")({
   head: ({ params }) => ({
@@ -22,9 +22,9 @@ export const Route = createFileRoute("/share/$id")({
   errorComponent: ({ error, reset }) => {
     const router = useRouter();
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="p-6 max-w-md">
-          <h2 className="font-semibold mb-2">Couldn't load this gallery</h2>
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+        <Card className="p-6 max-w-md border-border">
+          <h2 className="font-display text-lg uppercase tracking-tight mb-2">Couldn't load this gallery</h2>
           <p className="text-sm text-muted-foreground mb-4">{error.message}</p>
           <Button
             onClick={() => {
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/share/$id")({
     );
   },
   notFoundComponent: () => (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <p className="text-muted-foreground">Gallery not found.</p>
     </div>
   ),
@@ -56,7 +56,7 @@ function SharePage() {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground bg-background">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading gallery…
       </div>
     );
@@ -67,7 +67,7 @@ function SharePage() {
 
   if (!cats.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">This gallery is empty.</p>
       </div>
     );
@@ -78,13 +78,17 @@ function SharePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 py-5 flex items-center justify-between">
-          <Link to="/" className="font-semibold tracking-tight">
-            Luminiq
+      <header className="bg-background">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-negative text-background">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="font-display text-lg uppercase tracking-[0.08em]">Luminiq</span>
           </Link>
-          <span className="text-xs text-muted-foreground">Gallery {id}</span>
+          <span className="frame-counter">GALLERY {id.toUpperCase()}</span>
         </div>
+        <div className="filmstrip h-3 w-full" aria-hidden="true" />
       </header>
 
       <div className="mx-auto max-w-6xl px-6 py-8 grid md:grid-cols-[220px_1fr] gap-8">
@@ -93,34 +97,38 @@ function SharePage() {
             <button
               key={c}
               onClick={() => setActive(c)}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`dial-chip w-full text-left px-3 py-2.5 rounded-md text-sm border-2 ${
                 current === c
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent text-foreground"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-transparent hover:bg-accent text-foreground"
               }`}
             >
               <div className="font-medium">{CATEGORY_LABELS[c]}</div>
-              <div className="text-xs opacity-70">{folders[c].length} photos</div>
+              <div className="text-xs opacity-70 font-mono">{folders[c].length} photos</div>
             </button>
           ))}
         </aside>
 
         <section>
-          <h1 className="text-2xl font-semibold mb-4">{CATEGORY_LABELS[current]}</h1>
+          <h1 className="font-display text-2xl uppercase tracking-tight mb-4">{CATEGORY_LABELS[current]}</h1>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {photos.map((p) => (
+            {photos.map((p, i) => (
               <a
                 key={p.url}
                 href={p.url}
                 target="_blank"
                 rel="noreferrer"
-                className="block aspect-square overflow-hidden rounded-md bg-muted"
+                className="develop-in block aspect-square overflow-hidden rounded-md bg-muted relative"
+                style={{ animationDelay: `${Math.min(i, 24) * 35}ms` }}
               >
+                <span className="absolute left-1.5 top-1.5 z-10 frame-counter rounded-sm bg-negative/70 px-1.5 py-0.5 text-background">
+                  F·{String(i + 1).padStart(3, "0")}
+                </span>
                 <img
                   src={p.url}
                   alt={p.name}
                   loading="lazy"
-                  className="h-full w-full object-cover hover:scale-105 transition-transform"
+                  className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
                 />
               </a>
             ))}
